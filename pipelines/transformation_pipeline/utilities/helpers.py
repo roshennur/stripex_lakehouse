@@ -10,7 +10,7 @@ def get_catalog() -> str:
     ingestion pipeline's helper — reads 'stripex.catalog' from the pipeline's
     Configuration field, defaults to 'dev' for interactive development.
     """
-    sparl = SparkSession.getActiveSession()
+    spark = SparkSession.getActiveSession()
     return spark.conf.get("stripex.catalog", "dev")
 
 def bronze_table(name: str) -> str:
