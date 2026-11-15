@@ -27,50 +27,22 @@ anything upstream.
 """
 
 from pyspark import pipelines as dp
-from pyspark.sql.functions import col, sum as _sum, to_date, coalesce, lit, when
+from gold_revenue_logic import compute_daily_revenue
 
 @dp.materialized_view(
     name="gold_daily_revenue",
     comment="Revenue by day, category, and region — gross, discount, and net reported."
 )
 def gold_daily_revenue():
-    order_items = spark.read.table("silver_order_items") # SCD Type 1
-    orders_current = spark.read.table("silver_orders").filter(col("__END_AT").isNull())
-    products = spark.read.table("silver_products") # SCD Type 1
-    categories = spark.read.table("silver_categories") # SCD Type 1
 
-    order_subtotals = (
-        order_items.groupBy("order_id")
-          .agg(_sum("line_total").alias("order_subtotal"))
+    return compute_daily_revenue(
+        order_items_df = spark.read.table("silver_order_items"),
+        orders_df = spark.read.table("silver_orders"),
+        products_df = spark.read.table("silver_products"),
+        categories_df = spark.read.table("silver_categories")
     )
 
-    items_with_discount = (
-        order_items
-            .join(orders_current, "order_id")
-            .join(order_subtotals, "order_id")
-            .withColumn("order_discount", coalesce(col("discount_amount"), lit(0.0)))
-            .withColumn(
-                "allocated_discount",
-                when(col("order_subtotal") > 0, col("line_total") / col("order_subtotal") * col("order_discount"))
-                    .otherwise(lit(0.0))
-            )
-    )
-
-    return (
-        items_with_discount
-        .join(products, "product_id")
-        .join(categories, "category_id")
-        .groupBy(
-            to_date(col("order_date")).alias("revenue_date"),
-            col("category_name"),
-            col("shipping_state").alias("region")
-        )
-        .agg(
-            _sum("line_total").alias("gross_revenue"),
-            _sum("allocated_discount").alias("total_discount"),
-            (_sum("line_total") - _sum("allocated_discount")).alias("net_revenue")
-        )
-    )
+    
 
 
 
