@@ -13,29 +13,11 @@ grain for this table.
 """
 
 from pyspark import pipelines as dp
-from pyspark.sql.functions import col, count, sum as _sum, max as _max, when
+from gold_funnel_logic import compute_funnel_analysis
 
 @dp.materialized_view(
     name="gold_funnel_analysis",
     comment="Conversion rate bu channel, including anonymous session."
 )
 def gold_funnel_analysis():
-    events = spark.read.table("silver_clickstream")
-
-    session_outcomes = (
-        events
-        .groupBy("session_id", "referrer")
-        .agg(
-            _max(when(col("event_type") == "purchase", 1).otherwise(0)).alias("converted")
-        )
-    )
-
-    return (
-        session_outcomes
-        .groupBy("referrer")
-        .agg(
-            count("session_id").alias("total_sessions"),
-            _sum("converted").alias("converted_sessions")
-        )
-        .withColumn("conversion_rate", col("converted_sessions") / col("total_sessions"))
-    )
+    return compute_funnel_analysis(spark.read.table("silver_clickstream"))
