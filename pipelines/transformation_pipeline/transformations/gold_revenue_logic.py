@@ -16,7 +16,7 @@ def compute_daily_revenue(
 
     items_with_discount = (
         order_items_df
-            .join(orders_df, "order_id")
+            .join(orders_current, "order_id")
             .join(order_subtotals, "order_id")
             .withColumn("order_discount", coalesce(col("discount_amount"), lit(0.0)))
             .withColumn(
