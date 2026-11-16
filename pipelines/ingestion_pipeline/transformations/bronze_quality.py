@@ -46,6 +46,11 @@ correct.
 
 from pyspark import pipelines as dp
 from pyspark.sql.functions import expr
+from bronze_quality_logic import quarantine_rule
+
+# ---------------------------------------------------------------------------
+# bronze_orders (CDC)
+# ---------------------------------------------------------------------------
 
 ORDERS_RULES = {
     "valid_order_id": "after.order_id IS NOT NULL",
@@ -53,16 +58,12 @@ ORDERS_RULES = {
     "valid_total_amount": "(after.total_amount IS NULL OR after.total_amount >= 0)"
 }
 
-def _quarantine_rule(rules: dict) -> str:
-    """True if Any rule Failed - the row belongs to quarantine."""
-    return "NOT({0})".format(" AND ".join(rules.values()))
-
 @dp.table(private=True,
           name="bronze_orders_quality_check",
           partition_cols=["is_quarantined"])
 @dp.expect_all(ORDERS_RULES)
 def bronze_orders_quality_check():
-    return (spark.readStream.table("bronze_orders").withColumn("is_quarantined", expr(_quarantine_rule(ORDERS_RULES)))
+    return (spark.readStream.table("bronze_orders").withColumn("is_quarantined", expr(quarantine_rule(ORDERS_RULES)))
     )
 
 @dp.table(name="bronze_orders_valid",
@@ -91,7 +92,7 @@ PRODUCTS_RULES = {
           partition_cols=["is_quarantined"])
 @dp.expect_all(PRODUCTS_RULES)
 def bronze_products_quality_check():
-    return (spark.readStream.table("bronze_products").withColumn("is_quarantined", expr(_quarantine_rule(PRODUCTS_RULES)))
+    return (spark.readStream.table("bronze_products").withColumn("is_quarantined", expr(quarantine_rule(PRODUCTS_RULES)))
     )
 
 
@@ -125,7 +126,7 @@ ORDER_ITEMS_RULES = {
           partition_cols=["is_quarantined"])
 @dp.expect_all(ORDER_ITEMS_RULES)
 def bronze_order_items_quality_check():
-    return (spark.readStream.table("bronze_order_items").withColumn("is_quarantined", expr(_quarantine_rule(ORDER_ITEMS_RULES)))
+    return (spark.readStream.table("bronze_order_items").withColumn("is_quarantined", expr(quarantine_rule(ORDER_ITEMS_RULES)))
     )
 
 
@@ -157,7 +158,7 @@ CUSTOMERS_RULES = {
           partition_cols=["is_quarantined"])
 @dp.expect_all(CUSTOMERS_RULES)
 def bronze_customers_quality_check():
-    return (spark.readStream.table("bronze_customers").withColumn("is_quarantined", expr(_quarantine_rule(CUSTOMERS_RULES)))
+    return (spark.readStream.table("bronze_customers").withColumn("is_quarantined", expr(quarantine_rule(CUSTOMERS_RULES)))
     )
 
 
@@ -189,7 +190,7 @@ CATEGORIES_RULES = {
           partition_cols=["is_quarantined"])
 @dp.expect_all(CATEGORIES_RULES)
 def bronze_categories_quality_check():
-    return (spark.readStream.table("bronze_categories").withColumn("is_quarantined", expr(_quarantine_rule(CATEGORIES_RULES)))
+    return (spark.readStream.table("bronze_categories").withColumn("is_quarantined", expr(quarantine_rule(CATEGORIES_RULES)))
     )
 
 
@@ -222,7 +223,7 @@ CLICKSTREAM_RULES = {
           partition_cols=["is_quarantined"])
 @dp.expect_all(CLICKSTREAM_RULES)
 def bronze_clickstream_quality_check():
-    return (spark.readStream.table("bronze_clickstream").withColumn("is_quarantined", expr(_quarantine_rule(CLICKSTREAM_RULES)))
+    return (spark.readStream.table("bronze_clickstream").withColumn("is_quarantined", expr(quarantine_rule(CLICKSTREAM_RULES)))
     )
 
 
@@ -256,7 +257,7 @@ INVENTORY_RULES = {
           partition_cols=["is_quarantined"])
 @dp.expect_all(INVENTORY_RULES)
 def bronze_inventory_quality_check():
-    return (spark.readStream.table("bronze_inventory").withColumn("is_quarantined", expr(_quarantine_rule(INVENTORY_RULES)))
+    return (spark.readStream.table("bronze_inventory").withColumn("is_quarantined", expr(quarantine_rule(INVENTORY_RULES)))
     )
 
 
