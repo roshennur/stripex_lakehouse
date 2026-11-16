@@ -1,0 +1,11 @@
+resources:
+  dashboards:
+    stripex-dq-dashboards:
+      display_name: "StripeX DQ Dashboard"
+
+      file_path: ../../monitoring/dq_dashboard.lvdash.json
+
+      warehouse_id: ${var.stripex_warehouse_id}
+
+      dataset_catalog: ${var.stripex_catalog}
+      dataset_schema: stripex

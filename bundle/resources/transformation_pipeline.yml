@@ -1,0 +1,20 @@
+resources:
+  pipelines:
+    stripex-transformation-pipeline:
+      name: stripex-transformation-pipeline
+      serverless: true
+      allow_duplicate_names: true
+      tags:
+        environment: ${bundle.target}
+
+      root_path: ${workspace.file_path}/pipelines/transformation_pipeline
+
+      catalog: ${var.stripex_catalog}
+      schema: stripex
+
+      configuration:
+        stripex.catalog: ${var.stripext_catalog}
+
+      libraries:
+        - glob:
+            include: ../../pipelines/transformation_pipeline/transformations/**

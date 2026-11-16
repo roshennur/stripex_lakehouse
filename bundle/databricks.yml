@@ -1,0 +1,46 @@
+bundle:
+  name: stripex-lakehouse
+
+include:
+  - resources/ingestion_pipeline.yml
+  - resources/transformation_pipeline.yml
+  - resources/orchestration_job.yml
+  - resources/dq_dashboard.yml
+  - resources/environment_bootstrap_job.yml
+
+
+sync:
+  paths:
+    - ../pipelines
+    - ../jobs
+    - ../setup
+    - ../monitoring/dq_dashboard_setup.py
+
+
+variables:
+  stripex_catalog:
+    default: dev
+
+  stripex_warehouse_id:
+    description: SQL Warehouse ID, the DQ Dashboard queries run against.
+    default: ed87ab42542d3d7f
+
+
+targets:
+  dev:
+    default: true
+    workspace: 
+      host: https://dbc-e56ad5eb-37f6.cloud.databricks.com/
+
+  uat:
+    workspace:
+      host: https://dbc-e56ad5eb-37f6.cloud.databricks.com/
+    variables:
+      stripex_catalog: uat
+
+  prod:
+    workspace:
+      host: https://<PROD-WORKSPACE-HOST>.cloud.databricks.com/
+    variables:
+      stripex_catalog: prod
+      stripex_warehouse_id: 123

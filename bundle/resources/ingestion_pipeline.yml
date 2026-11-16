@@ -1,0 +1,19 @@
+resources:
+  pipelines:
+    stripex-ingestion-pipeline:
+      serverless: true
+      allow_duplicate_names: true
+      tags:
+        environment: ${bundle.target}
+
+      root_path: ${workspace.file_path}/pipelines/ingestion_pipeline
+      catalog: ${var.stripex_catalog}
+      schema: stripex
+
+      configuration:
+        stripex.catalog: ${var.stripex_catalog}
+
+      
+      libraries:
+        - glob:
+            include: ../../pipelines/ingestion_pipeline/transformations/**
