@@ -1,6 +1,7 @@
 resources:
   pipelines:
     stripex-ingestion-pipeline:
+      name: stripex-ingestion-pipeline
       serverless: true
       allow_duplicate_names: true
       tags:

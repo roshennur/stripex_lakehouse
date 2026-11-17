@@ -9,7 +9,7 @@ resources:
       tasks:
         - task_key: environment_setup
           notebook_task:
-            notebook_path: ../../setup/01_environment_setup.py
+            notebook_path: ../../setup/01_environment_setup.ipynb
             base_parameters:
               catalog: ${var.stripex_catalog}
  
@@ -29,7 +29,7 @@ resources:
           depends_on:
             - task_key: run_transformation
           notebook_task:
-            notebook_path: ../../setup/03_event_log_setup.py
+            notebook_path: ../../setup/03_event_log_setup.ipynb
             base_parameters:
               catalog: ${var.stripex_catalog}
               ingestion_pipeline_id: ${resources.pipelines.stripex-ingestion-pipeline.id}
@@ -39,7 +39,7 @@ resources:
           depends_on:
             - task_key: event_log_setup
           notebook_task:
-            notebook_path: ../../monitoring/dq_dashboard_setup.py
+            notebook_path: ../../monitoring/dq_dashboard_setup.ipynb
             base_parameters:
               catalog: ${var.stripex_catalog}
               schema: stripex

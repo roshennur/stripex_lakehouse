@@ -18,7 +18,7 @@ resources:
           depends_on:
             - task_key: run_ingestion
           notebook_task:
-            notebook_path: ../../jobs/dq_check.py
+            notebook_path: ../../jobs/dq_check.ipynb
             base_parameters:
               catalog: ${var.stripex_catalog}
  
