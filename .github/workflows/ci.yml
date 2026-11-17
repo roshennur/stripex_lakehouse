@@ -108,7 +108,8 @@ jobs:
 
             print(f'Successfully executed: {statement}')
 
-        print('UAT Unity Catalog infrastructure ensured.')
+          print('UAT Unity Catalog infrastructure ensured.')
+        "
  
       - name: Validate bundle
         working-directory: bundle
