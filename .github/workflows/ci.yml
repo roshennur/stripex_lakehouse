@@ -1,5 +1,6 @@
+
 name: CI
- 
+
 # Push to main, and workflow_dispatch for manual/demo runs — this is a
 # simple project, not a team repo with PRs, so push-to-main is the
 # natural trigger. Manual dispatch kept too, useful for recording.
@@ -7,7 +8,7 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
- 
+
 jobs:
   # ---------------------------------------------------------------------
   # Fast, no Databricks involved at all — fail-fast gate before anything
@@ -22,20 +23,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
- 
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
- 
+
       - name: Install test dependencies
         run: pip install pytest "pyspark>=3.5"
- 
+
       - name: Run ingestion_pipeline unit tests
         run: pytest pipelines/ingestion_pipeline/tests -v
- 
+
       - name: Run transformation_pipeline unit tests
         run: pytest pipelines/transformation_pipeline/tests -v
- 
+
   # ---------------------------------------------------------------------
   # Validates and deploys the bundle to uat. Only runs once unit-test
   # passes.
@@ -53,18 +54,19 @@ jobs:
       DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST_UAT }}
       DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN_UAT }}
       DATABRICKS_WAREHOUSE_ID_UAT: ${{ secrets.DATABRICKS_WAREHOUSE_ID_UAT }}
+
     steps:
       - uses: actions/checkout@v4
- 
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
- 
+
       - uses: databricks/setup-cli@main
- 
+
       - name: Install SDK for catalog-ensure step
         run: pip install databricks-sdk==0.67.0
- 
+
       # Real chicken-and-egg, worth explaining: bundle deploy fails
       # outright on the PIPELINE resources if the target catalog doesn't
       # exist yet (confirmed via a real 404 CATALOG_DOES_NOT_EXIST on
@@ -88,41 +90,41 @@ jobs:
           w = WorkspaceClient()
 
           statements = [
-            'CREATE CATALOG IF NOT EXISTS uat',
-            'CREATE SCHEMA IF NOT EXISTS uat.stripex',
-            'CREATE VOLUME IF NOT EXISTS uat.stripex.landing',
+              'CREATE CATALOG IF NOT EXISTS uat',
+              'CREATE SCHEMA IF NOT EXISTS uat.stripex',
+              'CREATE VOLUME IF NOT EXISTS uat.stripex.landing',
           ]
 
           for statement in statements:
-            resp = w.statement_execution.execute_statement(
-              warehouse_id=os.environ['DATABRICKS_WAREHOUSE_ID_UAT'],
-              statement=statement,
-              wait_timeout='30s'
-            )
+              resp = w.statement_execution.execute_statement(
+                  warehouse_id=os.environ['DATABRICKS_WAREHOUSE_ID_UAT'],
+                  statement=statement,
+                  wait_timeout='30s'
+              )
 
-            if resp.status.state.value != 'SUCCEEDED':
+              if resp.status.state.value != 'SUCCEEDED':
                   raise SystemExit(
                       f'Statement failed: {statement}. '
                       f'Error: {resp.status.error}'
                   )
 
-            print(f'Successfully executed: {statement}')
+              print(f'Successfully executed: {statement}')
 
           print('UAT Unity Catalog infrastructure ensured.')
-        "
- 
+          "
+
       - name: Validate bundle
         working-directory: bundle
         run: databricks bundle validate --target uat
- 
+
       - name: Deploy bundle
         working-directory: bundle
         run: databricks bundle deploy --target uat
- 
+
       - name: Run environment bootstrap
         working-directory: bundle
         run: databricks bundle run stripex-environment-bootstrap --target uat
- 
+
   # ---------------------------------------------------------------------
   # Real integration suite, against the just-deployed uat. Only
   # runs once validate-and-deploy-uat succeeds.
@@ -133,19 +135,19 @@ jobs:
     env:
       DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST_UAT }}
       DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN_UAT }}
+
     steps:
       - uses: actions/checkout@v4
- 
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
- 
+
       - uses: databricks/setup-cli@main
- 
+
       - name: Install test dependencies
         run: pip install pytest faker databricks-sdk==0.67.0
- 
+
       - name: Run integration tests
         working-directory: tests/integration
         run: pytest test_integration.py -v -s
- 
