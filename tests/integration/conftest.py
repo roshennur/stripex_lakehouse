@@ -144,14 +144,24 @@ def reset_uat(workspace_client: WorkspaceClient):
     # 01_environment_setup.ipynb already created those, and pipelines expect
     # them to exist).
     landing_root = f"/Volumes/{catalog}/stripex/landing"
+
     subfolders = [
         "orders_cdc", "order_items_cdc", "customers_cdc",
         "products", "categories", "clickstream", "inventory",
     ]
+
     for folder in subfolders:
         dir_path = f"{landing_root}/{folder}"
+
+        # Create the directory if it doesn't exist.
+        workspace_client.files.create_directory(dir_path)
+
+        # Delete existing files inside the directory.
         for entry in workspace_client.files.list_directory_contents(dir_path):
-            workspace_client.files.delete(f"{dir_path}/{entry.name}")
- 
+            if entry.is_directory:
+                workspace_client.files.delete_directory(entry.path)
+            else:
+                workspace_client.files.delete(entry.path)
+
     yield
  
