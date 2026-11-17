@@ -51,7 +51,7 @@ def local_spark():
             .master("local[2]")
             .appName("stripex-unit-tests")
             .config("spark.sql.shuffle.partitions", "2")
-            .get0rCreate()
+            .getOrCreate()
     )
     yield spark
     spark.stop()
