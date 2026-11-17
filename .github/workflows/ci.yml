@@ -84,16 +84,31 @@ jobs:
           python3 -c "
           import os
           from databricks.sdk import WorkspaceClient
+
           w = WorkspaceClient()
-          resp = w.statement_execution.execute_statement(
+
+          statements = [
+            'CREATE CATALOG IF NOT EXISTS uat',
+            'CREATE SCHEMA IF NOT EXISTS uat.stripex',
+            'CREATE VOLUME IF NOT EXISTS uat.stripex.landing',
+          ]
+
+          for statement in statements:
+            resp = w.statement_execution.execute_statement(
               warehouse_id=os.environ['DATABRICKS_WAREHOUSE_ID_UAT'],
-              statement='CREATE CATALOG IF NOT EXISTS uat',
-              wait_timeout='30s',
-          )
-          if resp.status.state.value != 'SUCCEEDED':
-              raise SystemExit(f'CREATE CATALOG failed: {resp.status.error}')
-          print('Catalog uat ensured (created if missing, no-op if already present)')
-          "
+              statement=statement,
+              wait_timeout='30s'
+            )
+
+            if resp.status.state.value != 'SUCCEEDED':
+                  raise SystemExit(
+                      f'Statement failed: {statement}. '
+                      f'Error: {resp.status.error}'
+                  )
+
+            print(f'Successfully executed: {statement}')
+
+        print('UAT Unity Catalog infrastructure ensured.')
  
       - name: Validate bundle
         working-directory: bundle

@@ -1,7 +1,7 @@
 resources:
   jobs:
     stripex-environment-bootstrap:
-      name: stepright-environment-bootstrap
+      name: stripex-environment-bootstrap
  
       tags:
         environment: ${bundle.target}
