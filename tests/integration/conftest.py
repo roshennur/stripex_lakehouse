@@ -87,7 +87,7 @@ def uat_resource_ids() -> UatResourceIds:
             ingestion_pipeline_id=resources["pipelines"]["stripex-ingestion-pipeline"]["id"],
             transformation_pipeline_id=resources["pipelines"]["stripex-transformation-pipeline"]["id"],
             orchestration_job_id=resources["jobs"]["stripex-orchestration-job"]["id"],
-            warehouse_id=summary["variables"]["stripex-warehouse-id"]["value"],
+            warehouse_id=summary["variables"]["stripex_warehouse_id"]["value"],
         )
     except KeyError as e:
         pytest.fail(
