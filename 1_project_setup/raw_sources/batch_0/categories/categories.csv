@@ -1,0 +1,7 @@
+category_id,category_name,parent_category_id,is_active
+CAT001,Running,,True
+CAT002,Casual,,True
+CAT003,Formal,,True
+CAT004,Sports,,True
+CAT005,Boots,,True
+CAT006,Sandals,,True
